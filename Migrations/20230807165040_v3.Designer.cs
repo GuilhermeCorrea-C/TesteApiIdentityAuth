@@ -12,8 +12,8 @@ using TesteAPIBearer.Context;
 namespace TesteAPIBearer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230804204022_v2")]
-    partial class v2
+    [Migration("20230807165040_v3")]
+    partial class v3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
