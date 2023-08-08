@@ -36,18 +36,21 @@ namespace TesteAPIBearer.Controllers
             return await _alunoService.GetAlunoById(id);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<AlunoModel> CriarAluno([FromBody]AlunoModel aluno)
         {
             return await _alunoService.CreateAluno(aluno);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<bool> DeleteAluno(int id )
         {
             return await _alunoService.DeleteAluno(id);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<AlunoModel> AtualizarAluno([FromBody]AlunoModel aluno, int id)
         {

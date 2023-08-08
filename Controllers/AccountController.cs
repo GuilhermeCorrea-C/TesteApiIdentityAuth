@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using TesteAPIBearer.Services.Interfaces;
@@ -18,11 +19,15 @@ namespace TesteAPIBearer.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IAuthenticate _authenticate;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AccountController(IConfiguration configuration, IAuthenticate authenticate)
+        public AccountController(IConfiguration configuration, 
+                                IAuthenticate authenticate, 
+                                UserManager<IdentityUser> userManager)
         {
             _configuration = configuration;
-            _authenticate = authenticate;            
+            _authenticate = authenticate;     
+            _userManager = userManager;       
         }
         
         [HttpPost("CreateUser")]
@@ -55,7 +60,7 @@ namespace TesteAPIBearer.Controllers
 
             if(auth)
             {
-                return GenerateToken(userInfo);
+                return await GenerateToken(userInfo);
             }
             else{
                 ModelState.AddModelError(string.Empty, "Login inválido");
@@ -63,13 +68,22 @@ namespace TesteAPIBearer.Controllers
             }
         }
 
-        private ActionResult<UserTokenViewModel> GenerateToken(LoginViewModel userInfo)
+        
+
+        private async Task<ActionResult<UserTokenViewModel>> GenerateToken(LoginViewModel userInfo)
         {
-            var claims = new []{
-                new Claim("email", userInfo.Email),
-                new Claim("meuToken", "token do guilherme"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
-            };
+            var user =  await _userManager.FindByEmailAsync(userInfo.Email);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var claims = new List<Claim> {
+            new Claim("email", userInfo.Email),
+            new Claim("meuToken", "token do guilherme"),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        foreach(var cargo in roles){
+            claims.Add(new Claim(ClaimTypes.Role, cargo));
+        }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
