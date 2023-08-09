@@ -82,7 +82,7 @@ namespace TesteAPIBearer.Controllers
         };
 
         foreach(var cargo in roles){
-            claims.Add(new Claim(ClaimTypes.Role, cargo));
+            claims.Add(new Claim("role", cargo));
         }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
