@@ -77,6 +77,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddScoped<IAuthenticate, AuthenticateService>();
+builder.Services.AddScoped<ISeedUserRolesInitial, SeedUserRolesInitial>();
 builder.Services.AddScoped<IAlunoService, AlunoService>();
 
 var app = builder.Build();
@@ -89,10 +90,22 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+await CriarPerfisUsuariosAsync(app);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+async Task CriarPerfisUsuariosAsync(WebApplication app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+    using(var scope = scopedFactory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<ISeedUserRolesInitial>();
+        await service.SeedRolesAsync();
+        await service.SeedUsersAsync();
+    }
+}
 
 app.Run();

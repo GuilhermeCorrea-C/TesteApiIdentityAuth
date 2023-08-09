@@ -16,8 +16,6 @@ namespace TesteAPIBearer.Context
         }
 
         public DbSet<AlunoModel> Alunos {get; set;}
-
-        
     }
 
 
